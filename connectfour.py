@@ -151,7 +151,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='4-connect')
     parser.add_argument('--player', type=int, default=0, help='Player to play with - 0 starts.')
-    parser.add_argument('--depth', type=int, default=4, help='AI lookahead depth')
+    parser.add_argument('--depth', type=int, default=5, help='AI lookahead depth')
     args = parser.parse_args()
 
     b = Board()
