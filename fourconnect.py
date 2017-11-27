@@ -2,10 +2,13 @@ import numpy as np
 from sys import float_info
 
 class Board:
+    '''Represents the current state of the game.'''
 
     WIN_SCORE = 1e4
 
     def __init__(self, state=None, player=0, score=None):
+        '''Initialize board.'''
+
         if state is None:
             self.state = np.zeros((6,7), dtype='b')
         else:
@@ -17,6 +20,7 @@ class Board:
         self.player = player
 
     def copy(self):
+        '''Returns a deep-copy of the board.'''
         return Board(state=self.state, player=self.player, score=self.score)
 
     def __repr__(self):
@@ -24,6 +28,7 @@ class Board:
         return f'Board(score={self.score}, finished={self.finished}, next-player={self.player})\n{self.state}'
 
     def __str__(self):
+        '''Stringify board.'''
         mapped = ['x', ' ', '#']
         s = '\n'.join(''.join(mapped[cell+1] for cell in row) for row in self.state)
         s = s + '\n' + '-'*self.state.shape[1]
@@ -31,7 +36,7 @@ class Board:
         return s
 
     def move(self, col):
-        '''Place a disc in given column.'''
+        '''Places a disc in given column for current player.'''
         assert col in self.possible_moves, f'Cannot place in column {col}.'
 
         row = self.state.shape[0] - np.count_nonzero(self.state[:, col]) - 1
@@ -47,14 +52,23 @@ class Board:
 
     @property
     def possible_moves(self):
-        '''Returns the available columns to place next disc.'''
+        '''Returns the available columns to place a disc.'''
         return np.where(self.state[0,:] == 0)[0]
 
     @property
     def finished(self):
+        '''Returns true if the game has finished, false otherwise.'''
         return abs(self.score[0]) == Board.WIN_SCORE or self.possible_moves.shape[0] == 0
 
     def _compute_score(self, row, col):
+        '''Returns the score for a given move.
+        
+        This is the evaluation function for the agent and is
+        responsible for how meaningful its moves are. The function
+        assigns Board.WIN_SCORE in case any player wins or
+        computes a heuristic for the move by counting the
+        number of slots per player for every combination of four.        
+        '''
         def score_strip(x):
             scores = np.zeros(2)
             for f in [x[i:i+4] for i in range(x.shape[0] - 3)]:
@@ -85,6 +99,7 @@ class Board:
         return total_score
         
 class Agent:
+    '''Artificial agent playing connect-four.'''
 
     def __init__(self, board, player, max_depth=4):
         self.board = board
