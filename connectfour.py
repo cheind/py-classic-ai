@@ -102,15 +102,33 @@ class Agent:
     '''Artificial agent playing connect-four.'''
 
     def __init__(self, board, player, max_depth=4):
+        '''Initialize agent.
+
+        Params
+        ------
+        board : Board
+            Board to play
+        player : int
+            Which player to take on (0 or 1)
+
+        Kwargs
+        ------
+        max_depth : int
+            Since exhaustive planning takes exponential time,
+            this value limits the look-ahead capability of the agent.
+        '''
+
         self.board = board
         self.max_depth = max_depth
         self.player = player
 
     def move(self):
+        '''Take the move that optimizes this players outcome.'''
         best = self.negamax(self.board, -float_info.max, float_info.max, self.max_depth, self.player)
         self.board.move(best[1])
 
     def negamax(self, board, alpha, beta, depth, player):
+        '''Recursively optimize the moves assuming the opponent plays optimal.'''
         if self.terminal(board, depth):
             return self.utility(board, player)
         else:
@@ -126,9 +144,11 @@ class Agent:
             return v
 
     def terminal(self, board, depth):
+        '''Test if current state is terminal.'''
         return depth == 0 or board.finished
 
     def utility(self, board, player):
+        '''Returns the utility score for the given player.'''
         return (board.score[player], board.last_move[1])
 
 if __name__ == '__main__':
