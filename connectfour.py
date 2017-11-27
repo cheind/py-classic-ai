@@ -1,3 +1,7 @@
+__author__ = 'Christoph Heindl'
+__copyright__ = 'Copyright 2017'
+__license__ = 'BSD'
+
 import numpy as np
 from sys import float_info
 
