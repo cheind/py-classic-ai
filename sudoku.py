@@ -18,7 +18,6 @@ board = np.array([
     0, 5, 3, 0, 0, 6, 9, 0, 0,
 ], dtype='b').reshape((9,9))
 
-
 Move = namedtuple('Move', 'choices row col', verbose=False)
 
 def possibilities(board, row, col):
