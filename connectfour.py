@@ -107,44 +107,29 @@ class Agent:
         self.player = player
 
     def move(self):
-        best = self.maximize(self.board, -float_info.max, float_info.max, self.max_depth)
+        best = self.negamax(self.board, -float_info.max, float_info.max, self.max_depth, self.player)
         self.board.move(best[1])
 
-    def maximize(self, board, alpha, beta, depth):
+    def negamax(self, board, alpha, beta, depth, player):
         if self.terminal(board, depth):
-            return self.utility(board)
+            return self.utility(board, player)
         else:
-            v = [-float_info.max, None]
+            v = (-float_info.max, None)
             for m in board.possible_moves:
-                r = self.minimize(board.copy_move(m), alpha, beta, depth - 1)
-                if r[0] > v[0]:
-                    v[0] = r[0]
-                    v[1] = m
-                    alpha = v[0]
+                score, move = self.negamax(board.copy_move(m), -beta, -alpha, depth - 1, 1 - player)
+                score *= -1
+                if score > v[0]:
+                    v = (score, m)
+                alpha = max(alpha, score)
                 if alpha >= beta:
-                    return v
-            return v
-    
-    def minimize(self, board, alpha, beta, depth):
-        if self.terminal(board, depth):
-            return self.utility(board)
-        else:
-            v = [float_info.max, None]
-            for m in board.possible_moves:
-                r = self.maximize(board.copy_move(m), alpha, beta, depth - 1)
-                if r[0] < v[0]:
-                    v[0] = r[0]
-                    v[1] = m
-                    beta = v[0]
-                if alpha >= beta:
-                    return v
+                    break
             return v
 
     def terminal(self, board, depth):
         return depth == 0 or board.finished
 
-    def utility(self, board):
-        return [board.score[self.player], board.last_move[1]]
+    def utility(self, board, player):
+        return (board.score[player], board.last_move[1])
 
 if __name__ == '__main__':
 
