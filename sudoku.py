@@ -40,9 +40,8 @@ def solve(board):
         b = board.copy()
         b[m.row, m.col] = c
         b = solve(b)
-        if b is not None:
-            return b
-        print('need to backtrack...') # rare but possible if few fields are known from the beginning.
+        if b is not None:  # rare but possible if few fields are known from the beginning.
+            return b        
     return None
 
 print(solve(board))
