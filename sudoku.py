@@ -18,7 +18,7 @@ board = np.array([
     0, 5, 3, 0, 0, 6, 9, 0, 0,
 ], dtype='b').reshape((9,9))
 
-Move = namedtuple('Move', 'choices row col', verbose=False)
+Cell = namedtuple('Cell', 'choices row col', verbose=False)
 
 def possibilities(board, row, col):
     i = row // 3
@@ -28,20 +28,27 @@ def possibilities(board, row, col):
         u = u[1:]
     return np.delete([1, 2, 3, 4, 5, 6, 7, 8, 9], u-1)
 
-def solve(board):
+def solve(board, order):
     rows, cols = np.where(board == 0)
-    moves = [Move(choices=possibilities(board, r, c), row=r, col=c) for r,c in zip(rows, cols)]
+    cells = [Cell(choices=possibilities(board, r, c), row=r, col=c) for r,c in zip(rows, cols)]
     
-    if len(moves) == 0:
-        return board
+    if len(cells) == 0:
+        return board, order
     
-    m = min(moves, key=lambda x:x.choices.shape[0])
-    for c in m.choices:
-        b = board.copy()
-        b[m.row, m.col] = c
-        b = solve(b)
-        if b is not None:  # rare but possible if few fields are known from the beginning.
-            return b        
-    return None
+    m = min(cells, key=lambda x:x.choices.shape[0])
+    for c in m.choices: # rare need to loop over multiple choices, expect when few fields are known from the beginning.       
+        nextboard = board.copy()
+        nextorder = order.copy()
+        
+        nextboard[m.row, m.col] = c
+        nextorder[m.row, m.col] = np.max(order) + 1
+        
+        nextboard, nextorder = solve(nextboard, nextorder)
+        if nextboard is not None:  
+            return nextboard, nextorder      
+    return None, order
 
-print(solve(board))
+board, order = solve(board, np.zeros((9,9), dtype=int))
+
+print(board)
+print(order)
