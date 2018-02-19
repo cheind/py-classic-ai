@@ -105,7 +105,7 @@ class Board:
 class Agent:
     '''Artificial agent playing connect-four.'''
 
-    def __init__(self, board, player, max_depth=4):
+    def __init__(self, board, player, max_depth=4, y=0.9):
         '''Initialize agent.
 
         Params
@@ -120,15 +120,19 @@ class Agent:
         max_depth : int
             Since exhaustive planning takes exponential time,
             this value limits the look-ahead capability of the agent.
+        y : float
+            Discount factor for future events
         '''
 
         self.board = board
         self.max_depth = max_depth
         self.player = player
-
+        self.y = 0.9
+        
     def move(self):
         '''Take the move that optimizes this players outcome.'''
-        best = self.negamax(self.board, -float_info.max, float_info.max, self.max_depth, self.player)
+        best = self.negamax(self.board, -float_info.max, float_info.max, 0, self.player)
+        #print(best)
         self.board.move(best[1])
 
     def negamax(self, board, alpha, beta, depth, player):
@@ -137,11 +141,13 @@ class Agent:
             return self.utility(board, player)
         else:
             v = (-float_info.max, None)
-            for m in board.possible_moves:
-                score, move = self.negamax(board.copy_move(m), -beta, -alpha, depth - 1, 1 - player)
-                score *= -1
+            for m in board.possible_moves:  
+                score, move = self.negamax(board.copy_move(m), -beta, -alpha, depth + 1, 1 - player)                
+                score *= -1 * self.y**depth 
+
                 if score > v[0]:
                     v = (score, m)
+
                 alpha = max(alpha, score)
                 if alpha >= beta:
                     break
@@ -149,7 +155,7 @@ class Agent:
 
     def terminal(self, board, depth):
         '''Test if current state is terminal.'''
-        return depth == 0 or board.finished
+        return depth == self.max_depth or board.finished
 
     def utility(self, board, player):
         '''Returns the utility score for the given player.'''
@@ -163,8 +169,11 @@ if __name__ == '__main__':
     parser.add_argument('--depth', type=int, default=5, help='AI lookahead depth')
     args = parser.parse_args()
 
+
     b = Board()
     o = Agent(b, player=(args.player + 1 % 2), max_depth=args.depth)
+
+    i = 0
     while not b.finished:
         print(b)
         if b.player == args.player:
@@ -175,3 +184,4 @@ if __name__ == '__main__':
 
     print(b)
     print('Game finished')
+    
